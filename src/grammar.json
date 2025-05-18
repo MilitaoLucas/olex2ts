@@ -1,6 +1,5 @@
 {
-  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
-  "name": "html",
+  "name": "olex2htm",
   "rules": {
     "document": {
       "type": "REPEAT",
@@ -69,8 +68,193 @@
         {
           "type": "SYMBOL",
           "name": "erroneous_end_tag"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "comment"
         }
       ]
+    },
+    "comment": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "include_comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "normal_comment"
+        }
+      ]
+    },
+    "normal_comment": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "beggin_comment_arg"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "\\s*?"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "[^#]"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_text"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "end_comment_arg"
+        }
+      ]
+    },
+    "include_comment": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "beggin_comment_arg"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "\\s*?"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "include_keyword"
+        },
+        {
+          "type": "PATTERN",
+          "value": "[\\s\\S]*?"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "include_arg"
+        },
+        {
+          "type": "PATTERN",
+          "value": "[\\s\\S]*?"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "include_sub_arg"
+                  },
+                  {
+                    "type": "PATTERN",
+                    "value": "[\\s\\S]*?"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "end_comment_arg"
+        }
+      ]
+    },
+    "beggin_comment_arg": {
+      "type": "STRING",
+      "value": "<!--"
+    },
+    "end_comment_arg": {
+      "type": "STRING",
+      "value": "-->"
+    },
+    "include_keyword": {
+      "type": "STRING",
+      "value": "#include"
+    },
+    "_text": {
+      "type": "PATTERN",
+      "value": "[^-]+"
+    },
+    "include_arg": {
+      "type": "PATTERN",
+      "value": "[^\\s]*?"
+    },
+    "include_sub_arg": {
+      "type": "PATTERN",
+      "value": "[^\\s]*?"
+    },
+    "ignoreif_comment": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "beggin_comment_arg"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "\\s*?"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ignoreif_keyword"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "end_comment_arg"
+        }
+      ]
+    },
+    "ignoreif_keyword": {
+      "type": "STRING",
+      "value": "#ifdef"
     },
     "element": {
       "type": "CHOICE",
@@ -448,10 +632,6 @@
   },
   "extras": [
     {
-      "type": "SYMBOL",
-      "name": "comment"
-    },
-    {
       "type": "PATTERN",
       "value": "\\s+"
     }
@@ -490,10 +670,6 @@
     {
       "type": "SYMBOL",
       "name": "raw_text"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "comment"
     }
   ],
   "inline": [],
