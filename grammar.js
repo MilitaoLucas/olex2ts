@@ -9,10 +9,9 @@
 // @ts-check
 
 module.exports = grammar({
-  name: 'html',
+  name: 'olex2htm',
 
   extras: $ => [
-    $.comment,
     /\s+/,
   ],
 
@@ -25,7 +24,6 @@ module.exports = grammar({
     '/>',
     $._implicit_end_tag,
     $.raw_text,
-    $.comment,
   ],
 
   rules: {
@@ -48,7 +46,55 @@ module.exports = grammar({
       $.script_element,
       $.style_element,
       $.erroneous_end_tag,
+      $.comment,
     ),
+
+    // start custom
+    comment: $ => choice(
+      $.include_comment,
+      $.normal_comment,
+    ),
+
+    normal_comment: $ => seq(
+      $.beggin_comment_arg,
+      optional(/\s*?/),
+      seq(
+        /[^#]/,
+        optional($._text)),
+      $.end_comment_arg,
+    ),
+
+    // Special case for include comments
+    include_comment: $ => seq(
+      $.beggin_comment_arg,
+      optional(/\s*?/),
+      $.include_keyword,
+      /[\s\S]*?/,
+      $.include_arg,
+      /[\s\S]*?/,
+      optional(repeat(seq(
+        $.include_sub_arg,
+        /[\s\S]*?/))),
+      $.end_comment_arg,
+    ),
+    beggin_comment_arg: (_) => '<!--',
+    end_comment_arg: (_) => '-->',
+
+
+    include_keyword: $ => '#include',
+    _text: (_) => /[^-]+/,
+    include_arg: $ => /[^\s]*?/,
+    include_sub_arg: $ => /[^\s]*?/,
+
+    ignoreif_comment: $ => seq(
+      $.beggin_comment_arg,
+      optional(/\s*?/),
+      $.ignoreif_keyword,
+
+      $.end_comment_arg,
+    ),
+    ignoreif_keyword: $ => '#ifdef',
+    // end custom part
 
     element: $ => choice(
       seq(

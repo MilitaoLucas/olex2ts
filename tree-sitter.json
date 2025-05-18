@@ -1,15 +1,16 @@
 {
   "grammars": [
     {
-      "name": "html",
-      "camelcase": "HTML",
+      "name": "olex2htm",
+      "camelcase": "OLEX2HTM",
       "scope": "source.html",
       "path": ".",
       "external-files": [
         "src/tag.h"
       ],
       "file-types": [
-        "html"
+        "html",
+        "htm"
       ],
       "highlights": "queries/highlights.scm",
       "injections": "queries/injections.scm",
@@ -39,7 +40,7 @@
     "go": true,
     "node": true,
     "python": true,
-    "rust": true,
+    "rust": false,
     "swift": true
   }
 }

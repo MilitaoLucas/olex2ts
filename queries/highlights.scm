@@ -1,3 +1,7 @@
+(include_keyword) @tag
+(include_arg) @constant
+(include_sub_arg) @string
+
 (tag_name) @tag
 (erroneous_end_tag_name) @tag.error
 (doctype) @constant
@@ -10,4 +14,4 @@
   ">"
   "</"
   "/>"
-] @punctuation.bracket
+  ] @punctuation.bracket
