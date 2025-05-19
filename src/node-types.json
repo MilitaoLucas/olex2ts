@@ -31,6 +31,10 @@
       "required": true,
       "types": [
         {
+          "type": "ignoreif_comment",
+          "named": true
+        },
+        {
           "type": "include_comment",
           "named": true
         },
@@ -49,6 +53,7 @@
   {
     "type": "document",
     "named": true,
+    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -175,9 +180,27 @@
     }
   },
   {
-    "type": "include_arg",
+    "type": "ignoreif_comment",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "element",
+          "named": true
+        },
+        {
+          "type": "ignoreif_arg",
+          "named": true
+        },
+        {
+          "type": "ignoreif_keyword",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "include_comment",
@@ -187,14 +210,6 @@
       "multiple": true,
       "required": true,
       "types": [
-        {
-          "type": "beggin_comment_arg",
-          "named": true
-        },
-        {
-          "type": "end_comment_arg",
-          "named": true
-        },
         {
           "type": "include_arg",
           "named": true
@@ -218,21 +233,7 @@
   {
     "type": "normal_comment",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "beggin_comment_arg",
-          "named": true
-        },
-        {
-          "type": "end_comment_arg",
-          "named": true
-        }
-      ]
-    }
+    "fields": {}
   },
   {
     "type": "quoted_attribute_value",
@@ -342,6 +343,10 @@
     "named": false
   },
   {
+    "type": "-->",
+    "named": false
+  },
+  {
     "type": "/>",
     "named": false
   },
@@ -351,6 +356,10 @@
   },
   {
     "type": "<!",
+    "named": false
+  },
+  {
+    "type": "<!--",
     "named": false
   },
   {
@@ -374,16 +383,8 @@
     "named": true
   },
   {
-    "type": "beggin_comment_arg",
-    "named": true
-  },
-  {
     "type": "doctype",
     "named": false
-  },
-  {
-    "type": "end_comment_arg",
-    "named": true
   },
   {
     "type": "entity",
@@ -394,7 +395,15 @@
     "named": true
   },
   {
+    "type": "ignoreif_arg",
+    "named": true
+  },
+  {
     "type": "ignoreif_keyword",
+    "named": true
+  },
+  {
+    "type": "include_arg",
     "named": true
   },
   {

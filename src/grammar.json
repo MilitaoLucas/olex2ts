@@ -1,4 +1,5 @@
 {
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
   "name": "olex2htm",
   "rules": {
     "document": {
@@ -43,6 +44,10 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "comment"
+        },
+        {
+          "type": "SYMBOL",
           "name": "doctype"
         },
         {
@@ -68,10 +73,6 @@
         {
           "type": "SYMBOL",
           "name": "erroneous_end_tag"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "comment"
         }
       ]
     },
@@ -85,15 +86,150 @@
         {
           "type": "SYMBOL",
           "name": "normal_comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ignoreif_comment"
         }
       ]
+    },
+    "include_comment": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_beggin_comment_arg"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\s*?"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "include_keyword"
+        },
+        {
+          "type": "PATTERN",
+          "value": "[\\s]+"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "include_arg"
+        },
+        {
+          "type": "PATTERN",
+          "value": "[\\s]+"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "include_sub_arg"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\s*?"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_end_comment_arg"
+        }
+      ]
+    },
+    "include_keyword": {
+      "type": "STRING",
+      "value": "#include"
+    },
+    "include_arg": {
+      "type": "PATTERN",
+      "value": "[\\w|\\w-]+"
+    },
+    "include_sub_arg": {
+      "type": "PATTERN",
+      "value": "([^-]|-[^-]|--[^>])*"
+    },
+    "ignoreif_comment": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_beggin_comment_arg"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\s*?"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ignoreif_keyword"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\s+"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ignoreif_arg"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "PATTERN",
+                    "value": "\\s*?"
+                  },
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "ignoreif_keyword"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "element"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\s*?"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_end_comment_arg"
+        }
+      ]
+    },
+    "ignoreif_keyword": {
+      "type": "STRING",
+      "value": "#ignoreif"
+    },
+    "ignoreif_arg": {
+      "type": "PATTERN",
+      "value": "[^\\n]+"
+    },
+    "ignoreif_sub_arg": {
+      "type": "PATTERN",
+      "value": "([^-]|-[^-]|--[^>])*"
     },
     "normal_comment": {
       "type": "SEQ",
       "members": [
         {
           "type": "SYMBOL",
-          "name": "beggin_comment_arg"
+          "name": "_beggin_comment_arg"
         },
         {
           "type": "CHOICE",
@@ -115,146 +251,24 @@
               "value": "[^#]"
             },
             {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "_text"
-                },
-                {
-                  "type": "BLANK"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "SYMBOL",
-          "name": "end_comment_arg"
-        }
-      ]
-    },
-    "include_comment": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "beggin_comment_arg"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
               "type": "PATTERN",
-              "value": "\\s*?"
-            },
-            {
-              "type": "BLANK"
+              "value": "([^-]|-[^-]|--[^>])*"
             }
           ]
         },
         {
           "type": "SYMBOL",
-          "name": "include_keyword"
-        },
-        {
-          "type": "PATTERN",
-          "value": "[\\s\\S]*?"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "include_arg"
-        },
-        {
-          "type": "PATTERN",
-          "value": "[\\s\\S]*?"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "REPEAT",
-              "content": {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "include_sub_arg"
-                  },
-                  {
-                    "type": "PATTERN",
-                    "value": "[\\s\\S]*?"
-                  }
-                ]
-              }
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "SYMBOL",
-          "name": "end_comment_arg"
+          "name": "_end_comment_arg"
         }
       ]
     },
-    "beggin_comment_arg": {
+    "_beggin_comment_arg": {
       "type": "STRING",
       "value": "<!--"
     },
-    "end_comment_arg": {
+    "_end_comment_arg": {
       "type": "STRING",
       "value": "-->"
-    },
-    "include_keyword": {
-      "type": "STRING",
-      "value": "#include"
-    },
-    "_text": {
-      "type": "PATTERN",
-      "value": "[^-]+"
-    },
-    "include_arg": {
-      "type": "PATTERN",
-      "value": "[^\\s]*?"
-    },
-    "include_sub_arg": {
-      "type": "PATTERN",
-      "value": "[^\\s]*?"
-    },
-    "ignoreif_comment": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "beggin_comment_arg"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "PATTERN",
-              "value": "\\s*?"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "SYMBOL",
-          "name": "ignoreif_keyword"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "end_comment_arg"
-        }
-      ]
-    },
-    "ignoreif_keyword": {
-      "type": "STRING",
-      "value": "#ifdef"
     },
     "element": {
       "type": "CHOICE",
@@ -673,5 +687,6 @@
     }
   ],
   "inline": [],
-  "supertypes": []
+  "supertypes": [],
+  "reserved": {}
 }

@@ -1,7 +1,6 @@
 /**
- * @file HTML grammar for tree-sitter
- * @author Max Brunsfeld <maxbrunsfeld@gmail.com>
- * @author Amaan Qureshi <amaanq12@gmail.com>
+ * @file Olex2HTM grammar for tree-sitter
+ * @author Lucas Militão <lucas.milito@usp.br>
  * @license MIT
  */
 
@@ -39,6 +38,7 @@ module.exports = grammar({
     _doctype: _ => /[Dd][Oo][Cc][Tt][Yy][Pp][Ee]/,
 
     _node: $ => choice(
+      $.comment,
       $.doctype,
       $.entity,
       $.text,
@@ -46,54 +46,61 @@ module.exports = grammar({
       $.script_element,
       $.style_element,
       $.erroneous_end_tag,
-      $.comment,
     ),
 
     // start custom
     comment: $ => choice(
       $.include_comment,
       $.normal_comment,
-    ),
-
-    normal_comment: $ => seq(
-      $.beggin_comment_arg,
-      optional(/\s*?/),
-      seq(
-        /[^#]/,
-        optional($._text)),
-      $.end_comment_arg,
+      $.ignoreif_comment,
     ),
 
     // Special case for include comments
     include_comment: $ => seq(
-      $.beggin_comment_arg,
-      optional(/\s*?/),
+      $._beggin_comment_arg,
+      /\s*?/,
       $.include_keyword,
-      /[\s\S]*?/,
+      /[\s]+/,
       $.include_arg,
-      /[\s\S]*?/,
-      optional(repeat(seq(
-        $.include_sub_arg,
-        /[\s\S]*?/))),
-      $.end_comment_arg,
+      /[\s]+/,
+      $.include_sub_arg,
+      /\s*?/,
+      $._end_comment_arg,
     ),
-    beggin_comment_arg: (_) => '<!--',
-    end_comment_arg: (_) => '-->',
 
-
+    // text: _ => /[^<>&\s]([^<>&]*[^<>&\s])?/,
     include_keyword: $ => '#include',
-    _text: (_) => /[^-]+/,
-    include_arg: $ => /[^\s]*?/,
-    include_sub_arg: $ => /[^\s]*?/,
+    include_arg: $ => /[\w|\w-]+/,
+    include_sub_arg: $ => /([^-]|-[^-]|--[^>])*/,
 
     ignoreif_comment: $ => seq(
-      $.beggin_comment_arg,
-      optional(/\s*?/),
+      $._beggin_comment_arg,
+      /\s*?/,
       $.ignoreif_keyword,
-
-      $.end_comment_arg,
+      /\s+/,
+      $.ignoreif_arg,
+      optional(repeat(seq(
+        /\s*?/,
+        choice($.ignoreif_keyword, $.element))  // Allow additional nodes
+      )),
+      /\s*?/,
+      $._end_comment_arg,
     ),
-    ignoreif_keyword: $ => '#ifdef',
+
+
+    ignoreif_keyword: $ => '#ignoreif',
+    ignoreif_arg: $ => /[^\n]+/,
+    ignoreif_sub_arg: $ => /([^-]|-[^-]|--[^>])*/,
+    normal_comment: $ => seq(
+      $._beggin_comment_arg,
+      optional(/\s*?/),
+      seq(
+        /[^#]/,
+        /([^-]|-[^-]|--[^>])*/),
+      $._end_comment_arg,
+    ),
+    _beggin_comment_arg: $ => '<!--',
+    _end_comment_arg: $ => '-->',
     // end custom part
 
     element: $ => choice(
