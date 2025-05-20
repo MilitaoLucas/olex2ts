@@ -84,6 +84,7 @@ module.exports = grammar({
         choice(
           $.ignoreif_comment,
           $.normal_comment,
+          $.include_comment,
           $.ignoreif_keyword,
           $.element))  // Allow additional nodes
       )),

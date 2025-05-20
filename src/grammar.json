@@ -179,7 +179,7 @@
                 "members": [
                   {
                     "type": "PATTERN",
-                    "value": "[\\s\\S]*?"
+                    "value": "\\s*?"
                   },
                   {
                     "type": "CHOICE",
@@ -191,6 +191,10 @@
                       {
                         "type": "SYMBOL",
                         "name": "normal_comment"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "include_comment"
                       },
                       {
                         "type": "SYMBOL",
@@ -212,7 +216,7 @@
         },
         {
           "type": "PATTERN",
-          "value": "[\\s]*?"
+          "value": "\\s*?"
         },
         {
           "type": "SYMBOL",

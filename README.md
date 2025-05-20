@@ -34,7 +34,8 @@ I am not affiliated with OlexSYS.
 The authors of the original project are:
 - [Max Brunsfeld](https://github.com/maxbrunsfeld)
 - [Amaan Qureshi ](https://github.com/amaanq)
-The author of this project is
+ 
+The author of this project is:
 - [Lucas Militão](https://github.com/MilitaoLucas)
 
 ## Contributing

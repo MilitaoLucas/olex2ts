@@ -204,6 +204,10 @@
           "named": true
         },
         {
+          "type": "include_comment",
+          "named": true
+        },
+        {
           "type": "normal_comment",
           "named": true
         }
