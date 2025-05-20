@@ -1,4 +1,4 @@
-# Olex2TS -- Olex2 Tree-sitter parser
+# Olex2TS -- Olex2 Tree-sitter grammar
 This project aims to at first improve color highlighting of Olex2-gui htm files. Maybe in the future, it could also 
 implement linting and other useful functionality. Every contribution is welcome!
 
