@@ -179,7 +179,7 @@
                 "members": [
                   {
                     "type": "PATTERN",
-                    "value": "\\s*?"
+                    "value": "[\\s\\S]*?"
                   },
                   {
                     "type": "CHOICE",
@@ -212,7 +212,7 @@
         },
         {
           "type": "PATTERN",
-          "value": "\\s*?"
+          "value": "[\\s]*?"
         },
         {
           "type": "SYMBOL",
