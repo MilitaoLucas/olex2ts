@@ -81,7 +81,11 @@ module.exports = grammar({
       $.ignoreif_arg,
       optional(repeat(seq(
         /\s*?/,
-        choice($.ignoreif_keyword, $.element))  // Allow additional nodes
+        choice(
+          $.ignoreif_comment,
+          $.normal_comment,
+          $.ignoreif_keyword,
+          $.element))  // Allow additional nodes
       )),
       /\s*?/,
       $._end_comment_arg,

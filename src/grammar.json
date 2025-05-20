@@ -186,6 +186,14 @@
                     "members": [
                       {
                         "type": "SYMBOL",
+                        "name": "ignoreif_comment"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "normal_comment"
+                      },
+                      {
+                        "type": "SYMBOL",
                         "name": "ignoreif_keyword"
                       },
                       {

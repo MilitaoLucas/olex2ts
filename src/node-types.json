@@ -196,7 +196,15 @@
           "named": true
         },
         {
+          "type": "ignoreif_comment",
+          "named": true
+        },
+        {
           "type": "ignoreif_keyword",
+          "named": true
+        },
+        {
+          "type": "normal_comment",
           "named": true
         }
       ]
