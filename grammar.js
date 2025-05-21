@@ -23,6 +23,12 @@ module.exports = grammar({
     '/>',
     $._implicit_end_tag,
     $.raw_text,
+    // New external tokens for ignoreif comments
+    $.ignoreif_keyword,
+    $.ignoreif_arg,
+    $.ignoreif_comment_content,
+    // External token for normal comment content
+    $.normal_comment_content, 
   ],
 
   rules: {
@@ -74,35 +80,26 @@ module.exports = grammar({
     include_sub_arg: $ => /([^-]|-[^-]|--[^>])*/,
 
     ignoreif_comment: $ => seq(
-      $._beggin_comment_arg,
-      /\s*?/,
-      $.ignoreif_keyword,
-      /\s+/,
-      $.ignoreif_arg,
-      optional(repeat(seq(
-        /\s*?/,
-        choice(
-          $.ignoreif_comment,
-          $.normal_comment,
-          $.include_comment,
-          $.ignoreif_keyword,
-          $.element))  // Allow additional nodes
-      )),
-      /\s*?/,
-      $._end_comment_arg,
+      $._beggin_comment_arg,      // <!--
+      $.ignoreif_keyword,         // #ignoreif (external)
+      $.ignoreif_arg,             // argument (external)
+      optional($.ignoreif_comment_content), // content (external)
+      $._end_comment_arg        // -->
     ),
 
+    // Removed old regex-based ignoreif_keyword and ignoreif_arg
+    // ignoreif_keyword: $ => '#ignoreif', // Now external
+    // ignoreif_arg: $ => /[^\n]+/, // Now external
+    ignoreif_sub_arg: $ => /([^-]|-[^-]|--[^>])*/, 
+    // This rule `ignoreif_sub_arg` seems unused.
+    // For now, it will be left as is, but could be removed in a future cleanup.
 
-    ignoreif_keyword: $ => '#ignoreif',
-    ignoreif_arg: $ => /[^\n]+/,
-    ignoreif_sub_arg: $ => /([^-]|-[^-]|--[^>])*/,
+    // normal_comment now uses an external token for its content.
+    // The external token $.normal_comment_content will scan content between <!-- and -->.
     normal_comment: $ => seq(
       $._beggin_comment_arg,
-      optional(/\s*?/),
-      seq(
-        /[^#]/,
-        /([^-]|-[^-]|--[^>])*/),
-      $._end_comment_arg,
+      optional($.normal_comment_content), // External token for content
+      $._end_comment_arg
     ),
     _beggin_comment_arg: $ => '<!--',
     _end_comment_arg: $ => '-->',

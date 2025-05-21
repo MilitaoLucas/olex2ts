@@ -154,16 +154,8 @@
           "name": "_beggin_comment_arg"
         },
         {
-          "type": "PATTERN",
-          "value": "\\s*?"
-        },
-        {
           "type": "SYMBOL",
           "name": "ignoreif_keyword"
-        },
-        {
-          "type": "PATTERN",
-          "value": "\\s+"
         },
         {
           "type": "SYMBOL",
@@ -173,41 +165,8 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "REPEAT",
-              "content": {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "PATTERN",
-                    "value": "\\s*?"
-                  },
-                  {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "SYMBOL",
-                        "name": "ignoreif_comment"
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "normal_comment"
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "include_comment"
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "ignoreif_keyword"
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "element"
-                      }
-                    ]
-                  }
-                ]
-              }
+              "type": "SYMBOL",
+              "name": "ignoreif_comment_content"
             },
             {
               "type": "BLANK"
@@ -215,22 +174,10 @@
           ]
         },
         {
-          "type": "PATTERN",
-          "value": "\\s*?"
-        },
-        {
           "type": "SYMBOL",
           "name": "_end_comment_arg"
         }
       ]
-    },
-    "ignoreif_keyword": {
-      "type": "STRING",
-      "value": "#ignoreif"
-    },
-    "ignoreif_arg": {
-      "type": "PATTERN",
-      "value": "[^\\n]+"
     },
     "ignoreif_sub_arg": {
       "type": "PATTERN",
@@ -247,24 +194,11 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "PATTERN",
-              "value": "\\s*?"
+              "type": "SYMBOL",
+              "name": "normal_comment_content"
             },
             {
               "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "PATTERN",
-              "value": "[^#]"
-            },
-            {
-              "type": "PATTERN",
-              "value": "([^-]|-[^-]|--[^>])*"
             }
           ]
         },
@@ -696,6 +630,22 @@
     {
       "type": "SYMBOL",
       "name": "raw_text"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "ignoreif_keyword"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "ignoreif_arg"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "ignoreif_comment_content"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "normal_comment_content"
     }
   ],
   "inline": [],

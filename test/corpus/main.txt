@@ -120,11 +120,11 @@ Comments
 ---
 
 (document
-  (comment)
-  (comment)
+  (comment (normal_comment))
+  (comment (normal_comment))
   (element
     (start_tag (tag_name))
-    (comment)
+    (comment (normal_comment))
     (end_tag (tag_name))))
 
 ==================================
@@ -380,3 +380,88 @@ Omitted end tags for html and head
     (element
       (start_tag
         (tag_name)))))
+
+==================
+Simple ignoreif
+==================
+<!-- #ignoreif ConditionA -->
+---
+(document
+  (comment
+    (_beggin_comment_arg)
+    (ignoreif_keyword)
+    (ignoreif_arg)
+    (_end_comment_arg)))
+
+==================
+Ignoreif with content
+==================
+<!-- #ignoreif ConditionB
+This is some content.
+<div>Hello</div>
+-->
+---
+(document
+  (comment
+    (_beggin_comment_arg)
+    (ignoreif_keyword)
+    (ignoreif_arg)
+    (ignoreif_comment_content)
+    (_end_comment_arg)))
+
+==================
+Ignoreif with whitespace
+==================
+<!--   #ignoreif   ConditionC   
+More content
+-->
+---
+(document
+  (comment
+    (_beggin_comment_arg)
+    (ignoreif_keyword)
+    (ignoreif_arg)
+    (ignoreif_comment_content)
+    (_end_comment_arg)))
+
+==================
+Ignoreif with argument spaces
+==================
+<!-- #ignoreif Argument with spaces
+Content here.
+-->
+---
+(document
+  (comment
+    (_beggin_comment_arg)
+    (ignoreif_keyword)
+    (ignoreif_arg)
+    (ignoreif_comment_content)
+    (_end_comment_arg)))
+
+==================
+Ignoreif empty content
+==================
+<!-- #ignoreif ConditionD
+-->
+---
+(document
+  (comment
+    (_beggin_comment_arg)
+    (ignoreif_keyword)
+    (ignoreif_arg)
+    (ignoreif_comment_content)
+    (_end_comment_arg)))
+
+==================
+Ignoreif no newline after arg
+==================
+<!-- #ignoreif ConditionE This is content on the same line -->
+---
+(document
+  (comment
+    (_beggin_comment_arg)
+    (ignoreif_keyword)
+    (ignoreif_arg)
+    (ignoreif_comment_content)
+    (_end_comment_arg)))
