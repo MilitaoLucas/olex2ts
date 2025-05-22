@@ -11,6 +11,7 @@ module.exports = grammar({
   name: 'olex2htm',
 
   extras: $ => [
+    $.comment,
     /\s+/,
   ],
 
@@ -23,6 +24,16 @@ module.exports = grammar({
     '/>',
     $._implicit_end_tag,
     $.raw_text,
+    $.include_comment,
+    $.ignoreif_comment,
+    $.normal_comment,
+    $.include_identifier,
+    $.ignoreif_identifier,
+    $.unknown_identifier,
+    $._comment_start,
+    // $._comment_content,
+      $.include_directive,
+    $._comment_end,
   ],
 
   rules: {
@@ -46,67 +57,23 @@ module.exports = grammar({
       $.script_element,
       $.style_element,
       $.erroneous_end_tag,
+      $.include_directive,
+      $.ignoreif_identifier,
+      $.unknown_identifier,
     ),
 
     // start custom
-    comment: $ => choice(
-      $.include_comment,
-      $.normal_comment,
-      $.ignoreif_comment,
+    comment: $ => seq(
+      $._comment_start,
+      /[\s\S]*?/,
+      $.include_directive,
+      /[\s\S]*?/,
+      $._comment_content,
+      /[\s\S]*?/,
+      $._comment_end,
     ),
-
-    // Special case for include comments
-    include_comment: $ => seq(
-      $._beggin_comment_arg,
-      /\s*?/,
-      $.include_keyword,
-      /[\s]+/,
-      $.include_arg,
-      /[\s]+/,
-      $.include_sub_arg,
-      /\s*?/,
-      $._end_comment_arg,
-    ),
-
-    // text: _ => /[^<>&\s]([^<>&]*[^<>&\s])?/,
-    include_keyword: $ => '#include',
-    include_arg: $ => /[\w|\w-]+/,
-    include_sub_arg: $ => /([^-]|-[^-]|--[^>])*/,
-
-    ignoreif_comment: $ => seq(
-      $._beggin_comment_arg,
-      /\s*?/,
-      $.ignoreif_keyword,
-      /\s+/,
-      $.ignoreif_arg,
-      optional(repeat(seq(
-        /\s*?/,
-        choice(
-          $.ignoreif_comment,
-          $.normal_comment,
-          $.include_comment,
-          $.ignoreif_keyword,
-          $.element))  // Allow additional nodes
-      )),
-      /\s*?/,
-      $._end_comment_arg,
-    ),
-
-
-    ignoreif_keyword: $ => '#ignoreif',
-    ignoreif_arg: $ => /[^\n]+/,
-    ignoreif_sub_arg: $ => /([^-]|-[^-]|--[^>])*/,
-    normal_comment: $ => seq(
-      $._beggin_comment_arg,
-      optional(/\s*?/),
-      seq(
-        /[^#]/,
-        /([^-]|-[^-]|--[^>])*/),
-      $._end_comment_arg,
-    ),
-    _beggin_comment_arg: $ => '<!--',
-    _end_comment_arg: $ => '-->',
-    // end custom part
+    _comment_content : $ => /([^-]|-[^-]|--[^>])*/,
+// end custom part
 
     element: $ => choice(
       seq(

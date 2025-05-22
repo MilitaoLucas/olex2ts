@@ -12,10 +12,23 @@ enum TokenType {
     SELF_CLOSING_TAG_DELIMITER,
     IMPLICIT_END_TAG,
     RAW_TEXT,
-    NORMAL_COMMENT,
-};
 
+    // Olex2 TAGS
+    INCLUDE_DIRECTIVE,
+    IGNOREIF_IDENTIFIER,
+    UNKNOWN_IDENTIFIER,
+    NORMAL_COMMENT,
+    INCLUDE_COMMENT,
+    IGNOREIF_COMMENT,
+    UNKNOWN_COMMENT,
+    COMMENT_START,
+    COMMENT_END,
+    COMMENT_CONTENT
+};
 typedef struct {
+    bool in_comment;
+    bool parsed_special;
+    String comment_type;
     Array(Tag) tags;
 } Scanner;
 
@@ -110,15 +123,6 @@ static String scan_tag_name(TSLexer *lexer) {
 }
 
 static bool scan_comment(TSLexer *lexer) {
-    if (lexer->lookahead != '-') {
-        return false;
-    }
-    advance(lexer);
-    if (lexer->lookahead != '-') {
-        return false;
-    }
-    advance(lexer);
-
     unsigned dashes = 0;
     while (lexer->lookahead) {
         switch (lexer->lookahead) {
@@ -285,6 +289,87 @@ static bool scan_self_closing_tag_delimiter(Scanner *scanner, TSLexer *lexer) {
     }
     return false;
 }
+static bool DEBUG = true;
+#ifdef DEBUG
+#include <stdio.h>
+#endif
+
+static String scan_olex_command(TSLexer *lexer) {
+    String command = array_new();
+    while (!iswspace(lexer->lookahead) && !lexer->eof(lexer)) {
+        array_push(&command, towupper(lexer->lookahead));
+        advance(lexer);
+    }
+    return command;
+}
+
+static bool scan_special_comment(Scanner *scanner, TSLexer *lexer,
+    const bool *valid_symbols)
+{
+    if (DEBUG)
+        printf("Found '%c' at column %u\n", (char)lexer->lookahead, lexer->get_column(lexer));
+
+    advance(lexer);
+    while (iswspace(lexer->lookahead) && !lexer->eof(lexer))
+        advance(lexer);
+    if (lexer->lookahead == '#' && valid_symbols[INCLUDE_DIRECTIVE]) {
+        lexer->mark_end(lexer);
+        String olx_command = scan_olex_command(lexer);
+        printf("%d", olx_command.size);
+        if (olx_command.size == 0) {
+            array_delete(&olx_command);
+            return false;
+        }
+        for (int i=0; i < olx_command.size; i++)
+            advance(lexer);
+        lexer->mark_end(lexer);
+        lexer->result_symbol = tag_type_for_name(&olx_command);
+        return true;
+    }
+
+    if (valid_symbols[COMMENT_CONTENT] && !valid_symbols[COMMENT_END])
+    {
+        lexer->mark_end(lexer);
+        while (iswalnum(lexer->lookahead) && !lexer->eof(lexer)) {
+            if (lexer->lookahead == '-' && valid_symbols[COMMENT_END])
+            {
+                lexer->mark_end(lexer);
+                advance(lexer);
+                if (lexer->lookahead == '-')
+                {
+                    advance(lexer);
+                    if (lexer->lookahead == '>')
+                    {
+                        lexer->result_symbol = COMMENT_CONTENT;
+                        return true;
+                    }
+                }
+            }
+        }
+        if (lexer->eof(lexer)) return true;
+
+        return true;
+    }
+
+    if (lexer->lookahead == '-' && valid_symbols[COMMENT_END])
+    {
+        advance(lexer);
+        lexer->mark_end(lexer);
+        if (lexer->lookahead == '-')
+        {
+            advance(lexer);
+            if (lexer->lookahead == '>')
+            {
+                advance(lexer);
+                lexer->mark_end(lexer);
+                lexer->result_symbol = COMMENT_END;
+                scanner->in_comment = false; // SET STATE
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
     if (valid_symbols[RAW_TEXT] && !valid_symbols[START_TAG_NAME] && !valid_symbols[END_TAG_NAME]) {
@@ -294,19 +379,76 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
     while (iswspace(lexer->lookahead)) {
         skip(lexer);
     }
-
     switch (lexer->lookahead) {
         case '<':
-            lexer->mark_end(lexer);
             advance(lexer);
+            lexer->mark_end(lexer);
 
             if (lexer->lookahead == '!') {
                 advance(lexer);
-                return scan_comment(lexer);
+                if (lexer->lookahead != '-') {
+                    return false;
+                }
+                advance(lexer);
+                if (lexer->lookahead != '-') {
+                    return false;
+                }
+                advance(lexer);
+                lexer->mark_end(lexer);
+
+                // If COMMENT_START is a valid symbol, recognize it.
+                if (valid_symbols[COMMENT_START]) {
+                    lexer->result_symbol = COMMENT_START;
+                    scanner->in_comment = true; // SET STATE
+                    return true;
+                }
             }
 
             if (valid_symbols[IMPLICIT_END_TAG]) {
                 return scan_implicit_end_tag(scanner, lexer);
+            }
+            break;
+
+        case '#':
+            if (scanner->in_comment && scanner->parsed_special)
+            {
+                while (iswspace(lexer->lookahead)) {
+                    advance(lexer);
+                }
+                advance(lexer);
+                lexer->mark_end(lexer);
+                String olx_command = scan_olex_command(lexer);
+                printf("%d", olx_command.size);
+                if (olx_command.size == 0) {
+                    printf("FATAL ERROR");
+                    array_delete(&olx_command);
+                    return false;
+                }
+                // for (int i=0; i < olx_command.size; i++)
+                //     advance(lexer);
+                lexer->mark_end(lexer);
+                lexer->result_symbol = tag_type_for_name(&olx_command);
+                return true;
+            }
+            break;
+
+        case '-':
+            advance(lexer);
+            if (scanner->in_comment)
+            {
+                lexer->mark_end(lexer);
+                if (lexer->lookahead == '-')
+                {
+                    advance(lexer);
+                    if (lexer->lookahead == '>')
+                    {
+                        advance(lexer);
+                        lexer->mark_end(lexer);
+                        lexer->result_symbol = COMMENT_END;
+                        scanner->in_comment = false; // SET STATE
+                        return true;
+                    }
+                }
             }
             break;
 

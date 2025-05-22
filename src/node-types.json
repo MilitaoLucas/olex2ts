@@ -31,15 +31,7 @@
       "required": true,
       "types": [
         {
-          "type": "ignoreif_comment",
-          "named": true
-        },
-        {
-          "type": "include_comment",
-          "named": true
-        },
-        {
-          "type": "normal_comment",
+          "type": "include_directive",
           "named": true
         }
       ]
@@ -80,6 +72,14 @@
           "named": true
         },
         {
+          "type": "ignoreif_identifier",
+          "named": true
+        },
+        {
+          "type": "include_directive",
+          "named": true
+        },
+        {
           "type": "script_element",
           "named": true
         },
@@ -89,6 +89,10 @@
         },
         {
           "type": "text",
+          "named": true
+        },
+        {
+          "type": "unknown_identifier",
           "named": true
         }
       ]
@@ -127,6 +131,14 @@
           "named": true
         },
         {
+          "type": "ignoreif_identifier",
+          "named": true
+        },
+        {
+          "type": "include_directive",
+          "named": true
+        },
+        {
           "type": "script_element",
           "named": true
         },
@@ -144,6 +156,10 @@
         },
         {
           "type": "text",
+          "named": true
+        },
+        {
+          "type": "unknown_identifier",
           "named": true
         }
       ]
@@ -178,74 +194,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "ignoreif_comment",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "element",
-          "named": true
-        },
-        {
-          "type": "ignoreif_arg",
-          "named": true
-        },
-        {
-          "type": "ignoreif_comment",
-          "named": true
-        },
-        {
-          "type": "ignoreif_keyword",
-          "named": true
-        },
-        {
-          "type": "include_comment",
-          "named": true
-        },
-        {
-          "type": "normal_comment",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "include_comment",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "include_arg",
-          "named": true
-        },
-        {
-          "type": "include_keyword",
-          "named": true
-        },
-        {
-          "type": "include_sub_arg",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "include_sub_arg",
-    "named": true,
-    "fields": {}
-  },
-  {
-    "type": "normal_comment",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "quoted_attribute_value",
@@ -355,10 +303,6 @@
     "named": false
   },
   {
-    "type": "-->",
-    "named": false
-  },
-  {
     "type": "/>",
     "named": false
   },
@@ -368,10 +312,6 @@
   },
   {
     "type": "<!",
-    "named": false
-  },
-  {
-    "type": "<!--",
     "named": false
   },
   {
@@ -407,19 +347,11 @@
     "named": true
   },
   {
-    "type": "ignoreif_arg",
+    "type": "ignoreif_identifier",
     "named": true
   },
   {
-    "type": "ignoreif_keyword",
-    "named": true
-  },
-  {
-    "type": "include_arg",
-    "named": true
-  },
-  {
-    "type": "include_keyword",
+    "type": "include_directive",
     "named": true
   },
   {
@@ -432,6 +364,10 @@
   },
   {
     "type": "text",
+    "named": true
+  },
+  {
+    "type": "unknown_identifier",
     "named": true
   }
 ]
