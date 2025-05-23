@@ -23,14 +23,6 @@ module.exports = grammar({
     '/>',
     $._implicit_end_tag,
     $.raw_text,
-    $.include_comment,
-    $.ignoreif_comment,
-    $.normal_comment,
-    $._comment_start,
-    // $._comment_content,
-    $.include_directive,
-    $._comment_end,
-    $.comment_content,
   ],
 
   rules: {
@@ -54,17 +46,62 @@ module.exports = grammar({
       $.script_element,
       $.style_element,
       $.erroneous_end_tag,
-      $.include_directive,
     ),
 
     // start custom
-    comment: $ => seq(
-        $._comment_start,
-        optional($.include_directive),
-        $.comment_content,
-        $._comment_end
+    comment: $ => choice(
+      $.include_comment,
+      $.normal_comment,
+      $.ignoreif_comment,
     ),
-// end custom part
+
+    // Special case for include comments
+    include_comment: $ => seq(
+      $._beggin_comment_arg,
+      /\s*?/,
+      $.include_keyword,
+      /[\s]+/,
+      $.include_arg,
+      /[\s]+/,
+      $.include_sub_arg,
+      /\s*?/,
+      $._end_comment_arg,
+    ),
+
+    // text: _ => /[^<>&\s]([^<>&]*[^<>&\s])?/,
+    include_keyword: $ => '#include',
+    include_arg: $ => /[\w|\w-]+/,
+    include_sub_arg: $ => /([^-]|-[^-]|--[^>])*/,
+
+    ignoreif_comment: $ => seq(
+      $._beggin_comment_arg,
+      /\s*?/,
+      $.ignoreif_keyword,
+      /\s+/,
+      $.ignoreif_arg,
+      optional(repeat(seq(
+        /\s*?/,
+        choice(optional($.ignoreif_keyword), $.element))  // Allow additional nodes
+      )),
+      /\s*?/,
+      $._end_comment_arg,
+    ),
+
+
+    ignoreif_keyword: $ => '#ignoreif',
+    ignoreif_arg: $ => /[^\n]+/,
+    ignoreif_sub_arg: $ => /([^-]|-[^-]|--[^>])*/,
+    normal_comment: $ => seq(
+      $._beggin_comment_arg,
+      optional(/\s*?/),
+      seq(
+        /[^#]/,
+        /([^-]|-[^-]|--[^>])*/),
+      $._end_comment_arg,
+    ),
+    _beggin_comment_arg: $ => '<!--',
+    _end_comment_arg: $ => '-->',
+    // end custom part
 
     element: $ => choice(
       seq(

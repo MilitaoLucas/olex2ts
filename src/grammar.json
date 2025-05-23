@@ -73,57 +73,210 @@
         {
           "type": "SYMBOL",
           "name": "erroneous_end_tag"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "include_directive"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "ignoreif_identifier"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "unknown_identifier"
         }
       ]
     },
     "comment": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "include_comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "normal_comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ignoreif_comment"
+        }
+      ]
+    },
+    "include_comment": {
       "type": "SEQ",
       "members": [
         {
           "type": "SYMBOL",
-          "name": "_comment_start"
+          "name": "_beggin_comment_arg"
         },
         {
           "type": "PATTERN",
-          "value": "[\\s\\S]*?"
+          "value": "\\s*?"
         },
         {
           "type": "SYMBOL",
-          "name": "include_directive"
+          "name": "include_keyword"
         },
         {
           "type": "PATTERN",
-          "value": "[\\s\\S]*?"
+          "value": "[\\s]+"
         },
         {
           "type": "SYMBOL",
-          "name": "_comment_content"
+          "name": "include_arg"
         },
         {
           "type": "PATTERN",
-          "value": "[\\s\\S]*?"
+          "value": "[\\s]+"
         },
         {
           "type": "SYMBOL",
-          "name": "_comment_end"
+          "name": "include_sub_arg"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\s*?"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_end_comment_arg"
         }
       ]
     },
-    "_comment_content": {
+    "include_keyword": {
+      "type": "STRING",
+      "value": "#include"
+    },
+    "include_arg": {
+      "type": "PATTERN",
+      "value": "[\\w|\\w-]+"
+    },
+    "include_sub_arg": {
       "type": "PATTERN",
       "value": "([^-]|-[^-]|--[^>])*"
+    },
+    "ignoreif_comment": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_beggin_comment_arg"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\s*?"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ignoreif_keyword"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\s+"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ignoreif_arg"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "PATTERN",
+                    "value": "\\s*?"
+                  },
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "CHOICE",
+                        "members": [
+                          {
+                            "type": "SYMBOL",
+                            "name": "ignoreif_keyword"
+                          },
+                          {
+                            "type": "BLANK"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "element"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\s*?"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_end_comment_arg"
+        }
+      ]
+    },
+    "ignoreif_keyword": {
+      "type": "STRING",
+      "value": "#ignoreif"
+    },
+    "ignoreif_arg": {
+      "type": "PATTERN",
+      "value": "[^\\n]+"
+    },
+    "ignoreif_sub_arg": {
+      "type": "PATTERN",
+      "value": "([^-]|-[^-]|--[^>])*"
+    },
+    "normal_comment": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_beggin_comment_arg"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "\\s*?"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "[^#]"
+            },
+            {
+              "type": "PATTERN",
+              "value": "([^-]|-[^-]|--[^>])*"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_end_comment_arg"
+        }
+      ]
+    },
+    "_beggin_comment_arg": {
+      "type": "STRING",
+      "value": "<!--"
+    },
+    "_end_comment_arg": {
+      "type": "STRING",
+      "value": "-->"
     },
     "element": {
       "type": "CHOICE",
@@ -501,10 +654,6 @@
   },
   "extras": [
     {
-      "type": "SYMBOL",
-      "name": "comment"
-    },
-    {
       "type": "PATTERN",
       "value": "\\s+"
     }
@@ -543,42 +692,6 @@
     {
       "type": "SYMBOL",
       "name": "raw_text"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "include_comment"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "ignoreif_comment"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "normal_comment"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "include_identifier"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "ignoreif_identifier"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "unknown_identifier"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "_comment_start"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "include_directive"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "_comment_end"
     }
   ],
   "inline": [],

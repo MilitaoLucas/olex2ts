@@ -12,23 +12,9 @@ enum TokenType {
     SELF_CLOSING_TAG_DELIMITER,
     IMPLICIT_END_TAG,
     RAW_TEXT,
-
-    // Olex2 TAGS
-    INCLUDE_DIRECTIVE,
-    IGNOREIF_IDENTIFIER,
-    UNKNOWN_IDENTIFIER,
-    NORMAL_COMMENT,
-    INCLUDE_COMMENT,
-    IGNOREIF_COMMENT,
-    UNKNOWN_COMMENT,
-    COMMENT_START,
-    COMMENT_END,
-    COMMENT_CONTENT
 };
+
 typedef struct {
-    bool in_comment;
-    bool parsed_special;
-    String comment_type;
     Array(Tag) tags;
 } Scanner;
 
@@ -123,6 +109,15 @@ static String scan_tag_name(TSLexer *lexer) {
 }
 
 static bool scan_comment(TSLexer *lexer) {
+    if (lexer->lookahead != '-') {
+        return false;
+    }
+    advance(lexer);
+    if (lexer->lookahead != '-') {
+        return false;
+    }
+    advance(lexer);
+
     unsigned dashes = 0;
     while (lexer->lookahead) {
         switch (lexer->lookahead) {
@@ -131,7 +126,7 @@ static bool scan_comment(TSLexer *lexer) {
                 break;
             case '>':
                 if (dashes >= 2) {
-                    lexer->result_symbol = NORMAL_COMMENT;
+                    // lexer->result_symbol = COMMENT;
                     advance(lexer);
                     lexer->mark_end(lexer);
                     return true;
@@ -289,106 +284,6 @@ static bool scan_self_closing_tag_delimiter(Scanner *scanner, TSLexer *lexer) {
     }
     return false;
 }
-static bool DEBUG = true;
-#ifdef DEBUG
-#include <stdio.h>
-#endif
-
-static String scan_olex_command(TSLexer *lexer) {
-    String command = array_new();
-    while (!iswspace(lexer->lookahead) && !lexer->eof(lexer)) {
-        array_push(&command, towupper(lexer->lookahead));
-        advance(lexer);
-    }
-    return command;
-}
-
-static bool scan_special_comment(Scanner *scanner, TSLexer *lexer,
-    const bool *valid_symbols)
-{
-    if (DEBUG)
-        printf("Found '#' at column %u\n", lexer->get_column(lexer));
-
-    // The lexer has already advanced past the '<' and '!' and '--' and any whitespace.
-    // We are now at the '#' character.
-    // Advance past the '#'
-    // advance(lexer);
-    lexer->mark_end(lexer); // Mark the end of the '#'
-    
-    while (iswspace(lexer->lookahead) && !lexer->eof(lexer))
-        advance(lexer);
-
-    String olx_command = scan_olex_command(lexer);
-
-    if (olx_command.size == 0) {
-        array_delete(&olx_command);
-        return false;
-    }
-    
-    // Set the result symbol based on the scanned command.
-    // Assuming tag_type_for_name correctly maps "INCLUDE" to INCLUDE_DIRECTIVE
-    lexer->result_symbol = tag_type_for_name(&olx_command);
-    array_delete(&olx_command); // Free the string after use
-
-    // Ensure that the entire command is consumed and the lexer is at the correct position.
-    // The scan_olex_command already advances the lexer, so no need for another loop here.
-    scanner->parsed_special = true;
-    return true;
-}
-
-static bool scan_comment_start(Scanner *scanner, TSLexer *lexer,
-    const bool *valid_symbols)
-{
-    if (lexer->lookahead != '-') {
-        return false;
-    }
-    advance(lexer);
-    if (lexer->lookahead != '-') {
-        return false;
-    }
-    advance(lexer);
-    lexer->mark_end(lexer);
-    // If COMMENT_START is a valid symbol, recognize it.
-    lexer->result_symbol = COMMENT_START;
-    scanner->in_comment = true; // SET STATE
-    return true;
-}
-
-static bool scan_comment_end(Scanner* scanner, TSLexer* lexer)
-{
-    if (lexer->lookahead != '>') {
-        return false;
-    }
-    advance(lexer);
-    lexer->mark_end(lexer);
-    lexer->result_symbol = COMMENT_END;
-    scanner->in_comment = false;
-    return true;
-}
-
-static bool parse_comment_contents(Scanner *scanner, TSLexer *lexer)
-{
-    lexer->mark_end(lexer);
-    const char *end_delimiter = "-->";
-    unsigned delimiter_index = 0;
-    while (lexer->lookahead && !lexer->eof(lexer)) {
-        if (lexer->lookahead == end_delimiter[delimiter_index]) {
-            delimiter_index++;
-            if (delimiter_index == strlen(end_delimiter)) {
-                break;
-            }
-            advance(lexer);
-        } else {
-            delimiter_index = 0;
-            advance(lexer);
-            lexer->mark_end(lexer);
-        }
-    }
-    if (lexer->eof(lexer)) return false;
-    lexer->result_symbol = COMMENT_CONTENT;
-    return true;
-}
-
 
 static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
     if (valid_symbols[RAW_TEXT] && !valid_symbols[START_TAG_NAME] && !valid_symbols[END_TAG_NAME]) {
@@ -399,70 +294,18 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         skip(lexer);
     }
 
-    if (scanner->in_comment) {
-        // Try to scan the end delimiter first
-        if (valid_symbols[COMMENT_END] && lexer->lookahead == '-') {
-            lexer->mark_end(lexer); // Mark current position as potential start of end delimiter
-            advance(lexer);
-            if (lexer->lookahead == '-') {
-                advance(lexer);
-                if (scan_comment_end(scanner, lexer)) return true;
-            }
-            if (scan_comment_end(scanner, lexer)) {
-                return true;
-            }
-        }
-        // If not the end delimiter, then it must be comment content.
-        if (valid_symbols[COMMENT_CONTENT]) {
-            return parse_comment_contents(scanner, lexer);
-        }
-    }
-
     switch (lexer->lookahead) {
         case '<':
-            advance(lexer);
             lexer->mark_end(lexer);
+            advance(lexer);
 
-            if (lexer->lookahead == '!') {
-                advance(lexer);
-                return scan_comment_start(scanner, lexer, valid_symbols);
-            }
+            // if (lexer->lookahead == '!') {
+            //     advance(lexer);
+            //     return scan_comment(lexer);
+            // }
 
             if (valid_symbols[IMPLICIT_END_TAG]) {
                 return scan_implicit_end_tag(scanner, lexer);
-            }
-            break;
-
-        case '#':
-            if (scanner->in_comment && !scanner->parsed_special)
-            {
-                return scan_special_comment(scanner, lexer, valid_symbols);
-                // while (iswspace(lexer->lookahead)) {
-                //     advance(lexer);
-                // }
-                // advance(lexer);
-                // lexer->mark_end(lexer);
-                // String olx_command = scan_olex_command(lexer);
-                // printf("%d", olx_command.size);
-                // if (olx_command.size == 0) {
-                //     printf("FATAL ERROR");
-                //     array_delete(&olx_command);
-                //     return false;
-                // }
-                // // for (int i=0; i < olx_command.size; i++)
-                // //     advance(lexer);
-                // lexer->mark_end(lexer);
-                // lexer->result_symbol = tag_type_for_name(&olx_command);
-                // return true;
-            }
-            break;
-
-        case '-':
-            advance(lexer);
-            lexer->mark_end(lexer);
-            if (lexer->lookahead == '-') {
-                advance(lexer);
-                return scan_comment_end(scanner, lexer);
             }
             break;
 
@@ -479,13 +322,11 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
             break;
 
         default:
-            if ((valid_symbols[START_TAG_NAME] || valid_symbols[END_TAG_NAME])
-                && !valid_symbols[RAW_TEXT]) {
+            if ((valid_symbols[START_TAG_NAME] || valid_symbols[END_TAG_NAME]) && !valid_symbols[RAW_TEXT]) {
                 return valid_symbols[START_TAG_NAME] ? scan_start_tag_name(scanner, lexer)
                                                      : scan_end_tag_name(scanner, lexer);
             }
     }
-
 
     return false;
 }
