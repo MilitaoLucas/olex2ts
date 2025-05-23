@@ -101,7 +101,7 @@ static void deserialize(Scanner *scanner, const char *buffer, unsigned length) {
 
 static String scan_tag_name(TSLexer *lexer) {
     String tag_name = array_new();
-    while (iswalnum(lexer->lookahead) || lexer->lookahead == '-' || lexer->lookahead == ':') {
+    while ((iswalnum(lexer->lookahead) || lexer->lookahead == '-' || lexer->lookahead == ':') && !lexer->eof(lexer)) {
         array_push(&tag_name, towupper(lexer->lookahead));
         advance(lexer);
     }
@@ -119,7 +119,7 @@ static bool scan_comment(TSLexer *lexer) {
     advance(lexer);
 
     unsigned dashes = 0;
-    while (lexer->lookahead) {
+    while (lexer->lookahead && !lexer->eof(lexer)) {
         switch (lexer->lookahead) {
             case '-':
                 ++dashes;
@@ -149,7 +149,7 @@ static bool scan_raw_text(Scanner *scanner, TSLexer *lexer) {
     const char *end_delimiter = array_back(&scanner->tags)->type == SCRIPT ? "</SCRIPT" : "</STYLE";
 
     unsigned delimiter_index = 0;
-    while (lexer->lookahead) {
+    while (lexer->lookahead && lexer->eof(lexer)) {
         if (towupper(lexer->lookahead) == end_delimiter[delimiter_index]) {
             delimiter_index++;
             if (delimiter_index == strlen(end_delimiter)) {
@@ -290,10 +290,10 @@ static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
         return scan_raw_text(scanner, lexer);
     }
 
-    while (iswspace(lexer->lookahead)) {
+    while (iswspace(lexer->lookahead) && !lexer->eof(lexer)) {
         skip(lexer);
     }
-
+    if (lexer->lookahead == '\0') return true;
     switch (lexer->lookahead) {
         case '<':
             lexer->mark_end(lexer);

@@ -25,25 +25,7 @@
   {
     "type": "comment",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "ignoreif_comment",
-          "named": true
-        },
-        {
-          "type": "include_comment",
-          "named": true
-        },
-        {
-          "type": "normal_comment",
-          "named": true
-        }
-      ]
-    }
+    "fields": {}
   },
   {
     "type": "doctype",
@@ -77,6 +59,18 @@
         },
         {
           "type": "erroneous_end_tag",
+          "named": true
+        },
+        {
+          "type": "ignoreif_comment",
+          "named": true
+        },
+        {
+          "type": "ignoreif_end_token",
+          "named": true
+        },
+        {
+          "type": "include_comment",
           "named": true
         },
         {
@@ -124,6 +118,18 @@
         },
         {
           "type": "erroneous_end_tag",
+          "named": true
+        },
+        {
+          "type": "ignoreif_comment",
+          "named": true
+        },
+        {
+          "type": "ignoreif_end_token",
+          "named": true
+        },
+        {
+          "type": "include_comment",
           "named": true
         },
         {
@@ -196,11 +202,24 @@
           "named": true
         },
         {
-          "type": "ignoreif_keyword",
+          "type": "ignoreif_begin_token",
+          "named": true
+        },
+        {
+          "type": "ignoreif_comment",
+          "named": true
+        },
+        {
+          "type": "ignoreif_end_token",
           "named": true
         }
       ]
     }
+  },
+  {
+    "type": "ignoreif_end_token",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "include_comment",
@@ -227,11 +246,6 @@
   },
   {
     "type": "include_sub_arg",
-    "named": true,
-    "fields": {}
-  },
-  {
-    "type": "normal_comment",
     "named": true,
     "fields": {}
   },
@@ -399,7 +413,7 @@
     "named": true
   },
   {
-    "type": "ignoreif_keyword",
+    "type": "ignoreif_begin_token",
     "named": true
   },
   {

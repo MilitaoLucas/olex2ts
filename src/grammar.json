@@ -43,8 +43,21 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "comment"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "comment"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "include_comment"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "ignoreif_comment"
+            }
+          ]
         },
         {
           "type": "SYMBOL",
@@ -53,10 +66,6 @@
         {
           "type": "SYMBOL",
           "name": "entity"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "text"
         },
         {
           "type": "SYMBOL",
@@ -73,23 +82,19 @@
         {
           "type": "SYMBOL",
           "name": "erroneous_end_tag"
-        }
-      ]
-    },
-    "comment": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "include_comment"
         },
         {
-          "type": "SYMBOL",
-          "name": "normal_comment"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "ignoreif_comment"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "text"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "ignoreif_end_token"
+            }
+          ]
         }
       ]
     },
@@ -147,78 +152,106 @@
       "value": "([^-]|-[^-]|--[^>])*"
     },
     "ignoreif_comment": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "_beggin_comment_arg"
-        },
-        {
-          "type": "PATTERN",
-          "value": "\\s*?"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "ignoreif_keyword"
-        },
-        {
-          "type": "PATTERN",
-          "value": "\\s+"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "ignoreif_arg"
-        },
-        {
-          "type": "CHOICE",
+      "type": "PREC_LEFT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "ignoreif_begin_token"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\s*?"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "ignoreif_arg"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "REPEAT",
+                "content": {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "PATTERN",
+                      "value": "\\s*?"
+                    },
+                    {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "element"
+                        },
+                        {
+                          "type": "SYMBOL",
+                          "name": "ignoreif_comment"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
+          {
+            "type": "SYMBOL",
+            "name": "ignoreif_end_token"
+          }
+        ]
+      }
+    },
+    "ignoreif_begin_token": {
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "<!--"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\s*?"
+          },
+          {
+            "type": "STRING",
+            "value": "#ignoreif"
+          }
+        ]
+      }
+    },
+    "ignoreif_end_token": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "TOKEN",
+        "content": {
+          "type": "SEQ",
           "members": [
             {
-              "type": "REPEAT",
-              "content": {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "PATTERN",
-                    "value": "\\s*?"
-                  },
-                  {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "CHOICE",
-                        "members": [
-                          {
-                            "type": "SYMBOL",
-                            "name": "ignoreif_keyword"
-                          },
-                          {
-                            "type": "BLANK"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "element"
-                      }
-                    ]
-                  }
-                ]
-              }
+              "type": "STRING",
+              "value": "#ignoreif"
             },
             {
-              "type": "BLANK"
+              "type": "PATTERN",
+              "value": "\\s*?"
+            },
+            {
+              "type": "STRING",
+              "value": "-->"
             }
           ]
-        },
-        {
-          "type": "PATTERN",
-          "value": "\\s*?"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_end_comment_arg"
         }
-      ]
+      }
     },
     "ignoreif_keyword": {
       "type": "STRING",
@@ -232,7 +265,7 @@
       "type": "PATTERN",
       "value": "([^-]|-[^-]|--[^>])*"
     },
-    "normal_comment": {
+    "comment": {
       "type": "SEQ",
       "members": [
         {
@@ -271,12 +304,18 @@
       ]
     },
     "_beggin_comment_arg": {
-      "type": "STRING",
-      "value": "<!--"
+      "type": "TOKEN",
+      "content": {
+        "type": "STRING",
+        "value": "<!--"
+      }
     },
     "_end_comment_arg": {
-      "type": "STRING",
-      "value": "-->"
+      "type": "TOKEN",
+      "content": {
+        "type": "STRING",
+        "value": "-->"
+      }
     },
     "element": {
       "type": "CHOICE",

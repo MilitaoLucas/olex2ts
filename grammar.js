@@ -38,22 +38,20 @@ module.exports = grammar({
     _doctype: _ => /[Dd][Oo][Cc][Tt][Yy][Pp][Ee]/,
 
     _node: $ => choice(
-      $.comment,
+      choice(
+        $.comment,
+        $.include_comment,
+        $.ignoreif_comment),
       $.doctype,
       $.entity,
-      $.text,
       $.element,
       $.script_element,
       $.style_element,
       $.erroneous_end_tag,
+      choice($.text, $.ignoreif_end_token),
     ),
 
     // start custom
-    comment: $ => choice(
-      $.include_comment,
-      $.normal_comment,
-      $.ignoreif_comment,
-    ),
 
     // Special case for include comments
     include_comment: $ => seq(
@@ -73,25 +71,23 @@ module.exports = grammar({
     include_arg: $ => /[\w|\w-]+/,
     include_sub_arg: $ => /([^-]|-[^-]|--[^>])*/,
 
-    ignoreif_comment: $ => seq(
-      $._beggin_comment_arg,
+    ignoreif_comment: $ => prec.left(seq(
+      $.ignoreif_begin_token,
       /\s*?/,
-      $.ignoreif_keyword,
-      /\s+/,
       $.ignoreif_arg,
       optional(repeat(seq(
         /\s*?/,
-        choice(optional($.ignoreif_keyword), $.element))  // Allow additional nodes
+        choice($.element, $.ignoreif_comment)), // Allow additional nodes
       )),
-      /\s*?/,
-      $._end_comment_arg,
-    ),
+      $.ignoreif_end_token,
+    )),
 
-
+    ignoreif_begin_token: $ => token(seq('<!--', /\s*?/, '#ignoreif')),
+    ignoreif_end_token: $ => prec(1, token(seq('#ignoreif', /\s*?/, '-->'))),
     ignoreif_keyword: $ => '#ignoreif',
     ignoreif_arg: $ => /[^\n]+/,
     ignoreif_sub_arg: $ => /([^-]|-[^-]|--[^>])*/,
-    normal_comment: $ => seq(
+    comment: $ => seq(
       $._beggin_comment_arg,
       optional(/\s*?/),
       seq(
@@ -99,8 +95,8 @@ module.exports = grammar({
         /([^-]|-[^-]|--[^>])*/),
       $._end_comment_arg,
     ),
-    _beggin_comment_arg: $ => '<!--',
-    _end_comment_arg: $ => '-->',
+    _beggin_comment_arg: $ => token('<!--'),
+    _end_comment_arg: $ => token('-->'),
     // end custom part
 
     element: $ => choice(
