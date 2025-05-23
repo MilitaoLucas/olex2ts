@@ -11,7 +11,6 @@ module.exports = grammar({
   name: 'olex2htm',
 
   extras: $ => [
-    $.comment,
     /\s+/,
   ],
 
@@ -27,13 +26,11 @@ module.exports = grammar({
     $.include_comment,
     $.ignoreif_comment,
     $.normal_comment,
-    $.include_identifier,
-    $.ignoreif_identifier,
-    $.unknown_identifier,
     $._comment_start,
     // $._comment_content,
-      $.include_directive,
+    $.include_directive,
     $._comment_end,
+    $.comment_content,
   ],
 
   rules: {
@@ -58,21 +55,15 @@ module.exports = grammar({
       $.style_element,
       $.erroneous_end_tag,
       $.include_directive,
-      $.ignoreif_identifier,
-      $.unknown_identifier,
     ),
 
     // start custom
     comment: $ => seq(
-      $._comment_start,
-      /[\s\S]*?/,
-      $.include_directive,
-      /[\s\S]*?/,
-      $._comment_content,
-      /[\s\S]*?/,
-      $._comment_end,
+        $._comment_start,
+        optional($.include_directive),
+        $.comment_content,
+        $._comment_end
     ),
-    _comment_content : $ => /([^-]|-[^-]|--[^>])*/,
 // end custom part
 
     element: $ => choice(
