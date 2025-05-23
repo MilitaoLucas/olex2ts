@@ -66,10 +66,6 @@
           "named": true
         },
         {
-          "type": "ignoreif_end_token",
-          "named": true
-        },
-        {
           "type": "include_comment",
           "named": true
         },
@@ -122,10 +118,6 @@
         },
         {
           "type": "ignoreif_comment",
-          "named": true
-        },
-        {
-          "type": "ignoreif_end_token",
           "named": true
         },
         {
@@ -194,7 +186,15 @@
       "required": true,
       "types": [
         {
+          "type": "comment",
+          "named": true
+        },
+        {
           "type": "element",
+          "named": true
+        },
+        {
+          "type": "entity",
           "named": true
         },
         {
@@ -212,14 +212,21 @@
         {
           "type": "ignoreif_end_token",
           "named": true
+        },
+        {
+          "type": "include_comment",
+          "named": true
+        },
+        {
+          "type": "script_element",
+          "named": true
+        },
+        {
+          "type": "style_element",
+          "named": true
         }
       ]
     }
-  },
-  {
-    "type": "ignoreif_end_token",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "include_comment",
@@ -414,6 +421,10 @@
   },
   {
     "type": "ignoreif_begin_token",
+    "named": true
+  },
+  {
+    "type": "ignoreif_end_token",
     "named": true
   },
   {

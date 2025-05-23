@@ -43,21 +43,16 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "comment"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "include_comment"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "ignoreif_comment"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "include_comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ignoreif_comment"
         },
         {
           "type": "SYMBOL",
@@ -84,17 +79,41 @@
           "name": "erroneous_end_tag"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "text"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "ignoreif_end_token"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "text"
+        }
+      ]
+    },
+    "_comment_node": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "include_comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ignoreif_comment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "entity"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "element"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "script_element"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "style_element"
         }
       ]
     },
@@ -170,37 +189,15 @@
             "name": "ignoreif_arg"
           },
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "REPEAT",
-                "content": {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "PATTERN",
-                      "value": "\\s*?"
-                    },
-                    {
-                      "type": "CHOICE",
-                      "members": [
-                        {
-                          "type": "SYMBOL",
-                          "name": "element"
-                        },
-                        {
-                          "type": "SYMBOL",
-                          "name": "ignoreif_comment"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "BLANK"
-              }
-            ]
+            "type": "REPEAT1",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_comment_node"
+            }
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\s*?"
           },
           {
             "type": "SYMBOL",
@@ -230,32 +227,24 @@
       }
     },
     "ignoreif_end_token": {
-      "type": "PREC",
-      "value": 1,
+      "type": "TOKEN",
       "content": {
-        "type": "TOKEN",
-        "content": {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "STRING",
-              "value": "#ignoreif"
-            },
-            {
-              "type": "PATTERN",
-              "value": "\\s*?"
-            },
-            {
-              "type": "STRING",
-              "value": "-->"
-            }
-          ]
-        }
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "#ignoreif"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\s*?"
+          },
+          {
+            "type": "STRING",
+            "value": "-->"
+          }
+        ]
       }
-    },
-    "ignoreif_keyword": {
-      "type": "STRING",
-      "value": "#ignoreif"
     },
     "ignoreif_arg": {
       "type": "PATTERN",
@@ -688,7 +677,7 @@
     },
     "text": {
       "type": "PATTERN",
-      "value": "[^<>&\\s]([^<>&]*[^<>&\\s])?"
+      "value": "[^#<>&\\s]([^<>&]*[^<>&\\s])?"
     }
   },
   "extras": [

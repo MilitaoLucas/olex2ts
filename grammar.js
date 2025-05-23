@@ -38,17 +38,26 @@ module.exports = grammar({
     _doctype: _ => /[Dd][Oo][Cc][Tt][Yy][Pp][Ee]/,
 
     _node: $ => choice(
-      choice(
-        $.comment,
-        $.include_comment,
-        $.ignoreif_comment),
+      $.comment,
+      $.include_comment,
+      $.ignoreif_comment,
       $.doctype,
       $.entity,
       $.element,
       $.script_element,
       $.style_element,
       $.erroneous_end_tag,
-      choice($.text, $.ignoreif_end_token),
+      $.text,
+    ),
+
+    _comment_node: $ => choice(
+      $.comment,
+      $.include_comment,
+      $.ignoreif_comment,
+      $.entity,
+      $.element,
+      $.script_element,
+      $.style_element,
     ),
 
     // start custom
@@ -75,16 +84,13 @@ module.exports = grammar({
       $.ignoreif_begin_token,
       /\s*?/,
       $.ignoreif_arg,
-      optional(repeat(seq(
-        /\s*?/,
-        choice($.element, $.ignoreif_comment)), // Allow additional nodes
-      )),
+      repeat1($._comment_node),
+      /\s*?/,
       $.ignoreif_end_token,
     )),
 
     ignoreif_begin_token: $ => token(seq('<!--', /\s*?/, '#ignoreif')),
-    ignoreif_end_token: $ => prec(1, token(seq('#ignoreif', /\s*?/, '-->'))),
-    ignoreif_keyword: $ => '#ignoreif',
+    ignoreif_end_token: $ => token(seq('#ignoreif', /\s*?/, '-->')),
     ignoreif_arg: $ => /[^\n]+/,
     ignoreif_sub_arg: $ => /([^-]|-[^-]|--[^>])*/,
     comment: $ => seq(
@@ -185,6 +191,6 @@ module.exports = grammar({
       seq('"', optional(alias(/[^"]+/, $.attribute_value)), '"'),
     ),
 
-    text: _ => /[^<>&\s]([^<>&]*[^<>&\s])?/,
+    text: _ => /[^#<>&\s]([^<>&]*[^<>&\s])?/,
   },
 });

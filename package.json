@@ -1,6 +1,6 @@
 {
   "name": "olex2htm",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Olex2HTM grammar for tree-sitter",
   "repository": "https://github.com/MilitaoLucas/olex2ts",
   "license": "MIT",
